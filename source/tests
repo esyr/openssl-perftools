@@ -1,0 +1,34 @@
+./evp_fetch
+./evp_setpeer -k dh
+./evp_setpeer -k ec256
+./evp_setpeer -k ec521
+./evp_setpeer -k x25519
+./evp_setpeer -k all
+./handshake ../../openssl/test/certs/
+./newrawkey
+./pkeyread -k dh -f pem
+./pkeyread -k dh -f der
+./pkeyread -k dh -f all
+./pkeyread -k dhx -f pem
+./pkeyread -k dhx -f der
+./pkeyread -k dhx -f all
+./pkeyread -k dsa -f pem
+./pkeyread -k dsa -f der
+./pkeyread -k dsa -f all
+./pkeyread -k ec -f pem
+./pkeyread -k ec -f der
+./pkeyread -k ec -f all
+./pkeyread -k rsa -f pem
+./pkeyread -k rsa -f der
+./pkeyread -k rsa -f all
+./pkeyread -k x25519 -f pem
+./pkeyread -k x25519 -f der
+./pkeyread -k x25519 -f all
+./pkeyread -k all -f pem
+./pkeyread -k all -f der
+./pkeyread -k all -f all
+./providerdoall
+./randbytes
+./rsasign
+./rwlocks
+./sslnew

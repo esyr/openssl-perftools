@@ -37,10 +37,10 @@ labels.
 
 ## randbytes
 
-The randbytes test does 10000 calls of the [RAND_bytes()](https://docs.openssl.org/master/man3/RAND_bytes/) function divided
+The randbytes test does 10000 calls of the [`RAND_bytes()`](https://docs.openssl.org/master/man3/RAND_bytes/) function divided
 evenly among multiple threads. The number of threads to use is provided as
 an argument and the test reports the average time take to execute a block of
-1000 [RAND_bytes()](https://docs.openssl.org/master/man3/RAND_bytes/) calls.
+1000 [`RAND_bytes()`](https://docs.openssl.org/master/man3/RAND_bytes/) calls.
 
 ## handshake
 
@@ -79,43 +79,43 @@ calls.
 
 ## newrawkey
 
-The `newrawkey` test repeatedly calls the [EVP_PKEY_new_raw_public_key_ex()](https://docs.openssl.org/master/man3/EVP_PKEY_new/)
+The `newrawkey` test repeatedly calls the [`EVP_PKEY_new_raw_public_key_ex()`](https://docs.openssl.org/master/man3/EVP_PKEY_new/)
 function. It does 100000 repetitions divided evenly among each thread. The
 number of threads to use is provided as an argument and the test reports the
-average time take to execute a block of 1000 [EVP_PKEY_new_raw_public_key_ex()](https://docs.openssl.org/master/man3/EVP_PKEY_new/)
+average time take to execute a block of 1000 [`EVP_PKEY_new_raw_public_key_ex()`](https://docs.openssl.org/master/man3/EVP_PKEY_new/)
 calls.
 
 Note that this test does not support OpenSSL 1.1.1.
 
 ## rsasign
 
-The `rsasign` test repeatedly calls the [EVP_PKEY_sign_init()/EVP_PKEY_sign()](https://docs.openssl.org/master/man3/EVP_PKEY_sign/)
+The `rsasign` test repeatedly calls the [`EVP_PKEY_sign_init()`/`EVP_PKEY_sign()`](https://docs.openssl.org/master/man3/EVP_PKEY_sign/)
 functions, using a 512 bit RSA key. It does 100000 repetitions divided evenly
 among each thread. The number of threads to use is provided as an argument and
 the test reports the average time take to execute a block of 1000
-[EVP_PKEY_sign_init()/EVP_PKEY_sign()](https://docs.openssl.org/master/man3/EVP_PKEY_sign/) calls.
+[`EVP_PKEY_sign_init()/EVP_PKEY_sign()`](https://docs.openssl.org/master/man3/EVP_PKEY_sign/) calls.
 
 ## x509storeissuer
 
-Runs the function call [X509_STORE_CTX_get1_issuer()](https://docs.openssl.org/master/man3/X509_STORE_set_verify_cb_func/) repeatedly in a loop (which
+Runs the function call [`X509_STORE_CTX_get1_issuer()`](https://docs.openssl.org/master/man3/X509_STORE_set_verify_cb_func/) repeatedly in a loop (which
 is used in certificate chain building as part of a verify operation). The test
 assumes that the default certificates directly exists but is empty. For a
 default configuration this is "/usr/local/ssl/certs". The test takes the number
 of threads to use as an argument and the test reports the average time take to
-execute a block of 1000 [X509_STORE_CTX_get1_issuer()](https://docs.openssl.org/master/man3/X509_STORE_set_verify_cb_func/) calls.
+execute a block of 1000 [`X509_STORE_CTX_get1_issuer()`](https://docs.openssl.org/master/man3/X509_STORE_set_verify_cb_func/) calls.
 
 ## providerdoall
 
-The `providerdoall` test repeatedly calls the [OSSL_PROVIDER_do_all()](https://docs.openssl.org/master/man3/OSSL_PROVIDER) function.
+The `providerdoall` test repeatedly calls the [`OSSL_PROVIDER_do_all()`](https://docs.openssl.org/master/man3/OSSL_PROVIDER) function.
 It does 100000 repetitions divided evenly among each thread. The number of
 threads to use is provided as an argument and the test reports the average time
-take to execute a block of 1000 [OSSL_PROVIDER_do_all()](https://docs.openssl.org/master/man3/OSSL_PROVIDER) calls.
+take to execute a block of 1000 [`OSSL_PROVIDER_do_all()`](https://docs.openssl.org/master/man3/OSSL_PROVIDER) calls.
 
 ## rwlocks
 
 The `rwlocks` test creates the command line specified number of threads, splitting
 them evenly between read and write functions (though this is adjustable via the
-LOCK_WRITERS environment variable).  Threads then iteratively acquire a shared
+`LOCK_WRITERS` environment variable).  Threads then iteratively acquire a shared
 rwlock to read or update some shared data.  The number of read and write
 lock/unlock pairs are reported as a performance measurement
 
@@ -148,7 +148,7 @@ for all keys and formats using 4 threads, run `pkeyread` as follows:
 
 ## evp_setpeer
 
-The `evp_setpeer` test repeatedly calls the [EVP_PKEY_derive_set_peer()](https://docs.openssl.org/master/man3/EVP_PKEY_derive/) function
+The `evp_setpeer` test repeatedly calls the [`EVP_PKEY_derive_set_peer()`](https://docs.openssl.org/master/man3/EVP_PKEY_derive/) function
 on a memory BIO with a private key of desired type.  It does 10000
 repetitions divided evenly among each thread. The last argument will be the
 number of threads run. The test reports average time per call. Use option `-k`
@@ -163,8 +163,8 @@ evp_setpeer as follows:
 ## writeread
 
 Performs an in-memory client and server handshake and measures the average
-time taken for a single sequence of calling [SSL_write_ex()](https://docs.openssl.org/master/man3/SSL_write/) on the client and
-[SSL_write_ex()](https://docs.openssl.org/master/man3/SSL_write/) on the server.  In total 1000000 writes and reads are performed
+time taken for a single sequence of calling [`SSL_write_ex()`](https://docs.openssl.org/master/man3/SSL_write/) on the client and
+[`SSL_write_ex()`](https://docs.openssl.org/master/man3/SSL_write/) on the server.  In total 1000000 writes and reads are performed
 divided evenly among each thread. It take 4 optional and 2 required arguments:
 
 ```
@@ -180,7 +180,7 @@ threadcount - number of concurrent threads to run in test.
 ## ssl_poll_perf
 
 Tool to evaluate performance of QUIC client and server which both use
-[SSL_poll](https://docs.openssl.org/master/man3/SSL_poll/)(3ossl). Application creates two threads, one for client the
+[`SSL_poll()`](https://docs.openssl.org/master/man3/SSL_poll/). Application creates two threads, one for client the
 other for server. Server and client can both accept/create simultanous
 connections. Each connection then can carry multiple unidirectional/bidirectional
 streams. The streams handle HTTP/1.0 GET request/responses only.

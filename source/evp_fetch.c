@@ -298,9 +298,9 @@ int main(int argc, char *argv[])
     int opt;
 
 #ifdef OPENSSL_DO_PQ
-    while ((opt = getopt(argc, argv, "tq")) != -1) {
+    while ((opt = getopt(argc, argv, "tqV")) != -1) {
 #else
-    while ((opt = getopt(argc, argv, "t")) != -1) {
+    while ((opt = getopt(argc, argv, "tV")) != -1) {
 #endif
         switch (opt) {
         case 't':
@@ -311,16 +311,20 @@ int main(int argc, char *argv[])
             pq = 1;
             break;
 #endif
+        case 'V':
+            perflib_print_version(basename(argv[0]));
+            return EXIT_SUCCESS;
         default:
 #ifdef OPENSSL_DO_PQ
-            printf("Usage: %s [-t] [-q] threadcount\n", basename(argv[0]));
+            printf("Usage: %s [-t] [-q] [-V] threadcount\n", basename(argv[0]));
 #else
-            printf("Usage: %s [-t] threadcount\n", basename(argv[0]));
+            printf("Usage: %s [-t] [-V] threadcount\n", basename(argv[0]));
 #endif
             printf("-t - terse output\n");
 #ifdef OPENSSL_DO_PQ
             printf("-q - include post-quantum algorithms\n");
 #endif
+            printf("-V - print version information and exit\n");
             return EXIT_FAILURE;
         }
     }

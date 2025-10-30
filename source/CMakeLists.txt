@@ -218,6 +218,11 @@ set(run_tests evp_fetch
               x509storeissuer
               CACHE STRING "List of tests to run")
 
+set(run_add_version_dep
+    ON
+    CACHE BOOL "Whether to print version information on run " +
+               "(call all the tests with -V option before the main run)")
+
 # Per-test options, the format: test option values
 set(run_evp_fetch_pqs
     evp_fetch "" "" "-q"
@@ -300,6 +305,15 @@ add_custom_target(run
                   COMMENT "Run perf tests"
                   WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
+# Version target
+add_custom_target(run-version
+                  COMMENT "Get version information for perf tests"
+                  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+if (run_add_version_dep)
+    add_dependencies(run run-version)
+endif()
+
+
 if(WIN32)
     # Prepare the PATH value for the generated batch files on Windows
     get_target_property(crypto_path OpenSSL::Crypto IMPORTED_LOCATION)
@@ -309,6 +323,75 @@ if(WIN32)
     set(win32_path "${crypto_path};${ssl_path};%PATH%")
 endif()
 
+#
+# gen_run_target(<cmd> <test> [VAR <var>] [NAME <name>])
+#
+# Generates a target that runs <cmd> and depends on target <test> and sets
+# <var> to the target's name.
+#
+function(gen_run_taget _CMD _TEST)
+    include(CMakeParseArguments)
+
+    set(_Options "")
+    set(_OneValueArgs VAR NAME)
+    set(_MultiValueArgs "")
+    cmake_parse_arguments(GEN_RUN_TARGET
+        "${_Options}"
+        "${_OneValueArgs}"
+        "${_MultiValueArgs}"
+        ${ARGN}
+    )
+
+    #
+    # In order to execute the command on Windows, we need
+    # to add OPENSSL_ROOT_DIR to PATH variable so runtime
+    # linker can find OpenSSL 's .dll files.  Adjusting PATH on Windows
+    # requires us to generate a .bat file with two commands:
+    #    set PATH=c:\...\OPENSSL_ROOT_DIR;%PATH%
+    #    command_to_exec with_options
+    #
+    string(REGEX REPLACE "  *" ";" cmd "${_CMD}")
+    string(REGEX REPLACE "[^0-9A-Za-z]" "-" cmd_target_name "${cmd}")
+    # A hack for lesser OSes that cannot normally distinguish lower-
+    # and uppercase letters.
+    if (WIN32 OR APPLE)
+        string(REGEX REPLACE "[A-Z]" "\\0_" cmd_target_name
+               "${cmd_target_name}")
+    endif()
+    if (NOT GEN_RUN_TARGET_NAME)
+        set(GEN_RUN_TARGET_NAME "run-${cmd_target_name}")
+    endif()
+    string(REPLACE ";" " " cmd_desc "${cmd}")
+
+
+    if(WIN32)
+        #
+        # generate .bat file and target to execute it.
+        #
+        file(GENERATE OUTPUT "${cmd_target_name}.bat"
+             CONTENT "set PATH=${win32_path}\n${_CMD}"
+             NEWLINE_STYLE WIN32)
+        add_custom_target("${GEN_RUN_TARGET_NAME}"
+                          COMMAND "${cmd_target_name}.bat"
+                          DEPENDS "${_TEST}"
+                          COMMENT "Run ${cmd_desc}"
+                          WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+                          USES_TERMINAL)
+    else()
+        add_custom_target("${GEN_RUN_TARGET_NAME}"
+                          COMMAND ${cmd}
+                          DEPENDS "${_TEST}"
+                          COMMENT "Run ${cmd_desc}"
+                          WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+                          USES_TERMINAL)
+    endif()
+
+    if (GEN_RUN_TARGET_VAR)
+        set("${GEN_RUN_TARGET_VAR}" "${GEN_RUN_TARGET_NAME}" PARENT_SCOPE)
+    endif()
+endfunction()
+
+# run targets generation
 foreach(test IN LISTS run_tests)
     set(cmds "${test}")
 
@@ -357,48 +440,13 @@ foreach(test IN LISTS run_tests)
     endforeach()
     set(cmds ${new_cmds})
 
+    # Run target
     foreach(cmd IN LISTS cmds)
-        #
-        # In order to execute the command on Windows, we need
-        # to add OPENSSL_ROOT_DIR to PATH variable so runtime
-        # linker can find OpenSSL 's .dll files.  Adjusting PATH on Windows
-        # requires us to generate a .bat file with two commands:
-        #    set PATH=c:\...\OPENSSL_ROOT_DIR;%PATH%
-        #    command_to_exec with_options
-        #
-        # raw_cmd variable keeps the command to execute
-        #
-        set(raw_cmd "${cmd}")
-        string(REGEX REPLACE "  *" ";" cmd "${cmd}")
-        string(REGEX REPLACE "[^0-9A-Za-z]" "-" cmd_target_name "${cmd}")
-        # A hack for lesser OSes that cannot normally distinguish lower-
-        # and uppercase letters.
-        if (WIN32 OR APPLE)
-            string(REGEX REPLACE "[A-Z]" "\\0_" cmd_target_name
-                   "${cmd_target_name}")
-        endif()
-        string(REPLACE ";" " " cmd_desc "${cmd}")
-        if(WIN32)
-            #
-            # generate .bat file and target to execute it.
-            #
-            file(GENERATE OUTPUT "${cmd_target_name}.bat"
-                 CONTENT "set PATH=${win32_path}\n${raw_cmd}"
-                 NEWLINE_STYLE WIN32)
-            add_custom_target("run-${cmd_target_name}"
-                              COMMAND "${cmd_target_name}.bat"
-                              DEPENDS "${test}"
-                              COMMENT "Run ${cmd_desc}"
-                              WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-                              USES_TERMINAL)
-        else()
-            add_custom_target("run-${cmd_target_name}"
-                              COMMAND ${cmd}
-                              DEPENDS "${test}"
-                              COMMENT "Run ${cmd_desc}"
-                              WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-                              USES_TERMINAL)
-        endif()
-        add_dependencies(run "run-${cmd_target_name}")
+        gen_run_taget("${cmd}" "${test}" VAR run_target_name)
+        add_dependencies(run "${run_target_name}")
     endforeach()
+
+    # Per-test version taget
+    gen_run_taget("${test} -V" "${test}" NAME "run-version-${test}")
+    add_dependencies(run-version "run-version-${test}")
 endforeach()
